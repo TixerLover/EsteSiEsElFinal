@@ -730,7 +730,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 463778828}
         m_TargetAssemblyTypeName: LinkedLists, Assembly-CSharp
-        m_MethodName: ReverseList
+        m_MethodName: BotonAgregarCoordenada
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
