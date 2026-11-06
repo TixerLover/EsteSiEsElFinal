@@ -5,8 +5,10 @@ using UnityEngine;
 public class LinkedLists : MonoBehaviour
 {
     public GameObject Node;
+    public Agent miAgente;
 
     LinkedList<Vector3> nodos = new LinkedList<Vector3>();
+    LinkedList<GameObject> objetosNodos = new LinkedList<GameObject>();
 
     private void Start()
     {
@@ -15,15 +17,24 @@ public class LinkedLists : MonoBehaviour
 
     public void BotonAgregarCoordenada()
     {
-        Vector3 nuevaCoordenada = new Vector3(Random.Range(-5, 5), 2, Random.Range(-10, 10));
+        Camera cam = Camera.main;
+        float randomX = Random.Range(0f, 1f);
+        float randomY = Random.Range(0f, 1f);
+        float distanciaZ = Mathf.Abs(cam.transform.position.z);
+        Vector3 puntoViewport = new Vector3(randomX, randomY, distanciaZ);
+        Vector3 nuevaCoordenada = cam.ViewportToWorldPoint(puntoViewport);
+        nuevaCoordenada.z = 0f;
+
         GuardarCoordenada(nuevaCoordenada);
     }
 
     public void GuardarCoordenada(Vector3 nuevaCoordenada)
     {
         nodos.AddLast(nuevaCoordenada);
+        GameObject nuevoNodoVisual = Instantiate(Node, nuevaCoordenada, Quaternion.identity);
+        objetosNodos.AddLast(nuevoNodoVisual);
+
         Debug.Log($"Coordenada guardada: {nuevaCoordenada}. Total nodos: {nodos.Count}");
-        Instantiate(Node, transform.position, Quaternion.identity);
     }
 
     public void MostrarRuta()
@@ -37,28 +48,38 @@ public class LinkedLists : MonoBehaviour
 
     public void ClearRoute()
     {
+        foreach (GameObject nodoVisual in objetosNodos)
+        {
+            Destroy(nodoVisual);
+        }
+
         nodos.Clear();
-        Debug.Log("Elementos despues de depurar: " + nodos.Count);
+        objetosNodos.Clear();
+
+        Debug.Log("Ruta limpiada. Elementos: " + nodos.Count);
     }
 
-    public void RemoveSpecific()
+    public void Remove()
     {
-        LinkedListNode<Vector3> node = nodos.Find(new Vector3(5, 2, 10));
-        if (node != null)
+        if (nodos.Count > 0)
         {
-            nodos.Remove(node);
-            Debug.Log("Coordenada eliminada con éxito.");
-        }
-        else
-        {
-            Debug.Log("El nodo que intentas eliminar no existe en la lista.");
+            nodos.RemoveFirst();
+            Destroy(objetosNodos.First.Value);
+            objetosNodos.RemoveFirst();
         }
     }
 
     public void ReverseList()
     {
         nodos = new LinkedList<Vector3>(nodos.Reverse());
+        objetosNodos = new LinkedList<GameObject>(objetosNodos.Reverse());
+
         Debug.Log("--- LISTA INVERTIDA ---");
         MostrarRuta();
+    }
+
+    public void BotonMoverAgente()
+    {
+        miAgente.RecibirInputRuta(nodos);
     }
 }
